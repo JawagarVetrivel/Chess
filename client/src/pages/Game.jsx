@@ -11,10 +11,11 @@ export default function Game() {
     const [whiteTime, setWhiteTime] = useState(600) // 10 minutes default
     const [blackTime, setBlackTime] = useState(600)
     const [orientation, setOrientation] = useState('white') // Dynamic later?
+    const [hasGameStarted, setHasGameStarted] = useState(false)
 
     // Timer Logic
     useEffect(() => {
-        if (game.isGameOver()) return;
+        if (game.isGameOver() || !hasGameStarted) return;
 
         const timer = setInterval(() => {
             if (game.turn() === 'w') {
@@ -47,9 +48,14 @@ export default function Game() {
             // Ideally stop game or show modal
         })
 
+        socket.on('game_start', () => {
+            setHasGameStarted(true)
+        })
+
         return () => {
             socket.off('receive_move')
             socket.off('player_resigned')
+            socket.off('game_start')
         }
     }, [roomId])
 

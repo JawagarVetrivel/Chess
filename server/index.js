@@ -20,6 +20,12 @@ io.on('connection', (socket) => {
     socket.on('join_room', (data) => {
         socket.join(data);
         console.log(`User with ID: ${socket.id} joined room: ${data}`);
+
+        const room = io.sockets.adapter.rooms.get(data);
+        if (room && room.size === 2) {
+            io.to(data).emit('game_start');
+            console.log(`Game started in room: ${data}`);
+        }
     });
 
     socket.on('send_move', (data) => {
