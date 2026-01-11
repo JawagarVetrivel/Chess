@@ -29,6 +29,7 @@ export default function Game() {
     }, [game])
 
     useEffect(() => {
+        if (!socket.connected) socket.connect()
         socket.emit('join_room', roomId)
 
         socket.on('receive_move', (move) => {
