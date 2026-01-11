@@ -12,6 +12,21 @@ export default function Game() {
     const [blackTime, setBlackTime] = useState(600)
     const [orientation, setOrientation] = useState('white') // Dynamic later?
     const [hasGameStarted, setHasGameStarted] = useState(false)
+    const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark')
+
+    // Theme Logic
+    useEffect(() => {
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+        localStorage.setItem('theme', theme)
+    }, [theme])
+
+    const toggleTheme = () => {
+        setTheme(prev => prev === 'dark' ? 'light' : 'dark')
+    }
 
     // Timer Logic
     useEffect(() => {
@@ -26,7 +41,7 @@ export default function Game() {
         }, 1000)
 
         return () => clearInterval(timer)
-    }, [game])
+    }, [game, hasGameStarted])
 
     useEffect(() => {
         if (!socket.connected) socket.connect()
@@ -93,14 +108,25 @@ export default function Game() {
     }
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-900 text-white p-4 font-sans">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-zinc-900 text-gray-900 dark:text-white p-4 font-sans transition-colors duration-300">
+
+            {/* Theme Toggle & Room Info */}
+            <div className="absolute top-4 right-4 flex gap-4">
+                <button
+                    onClick={toggleTheme}
+                    className="p-2 rounded-lg bg-white dark:bg-zinc-800 shadow border border-gray-200 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-700 transition"
+                >
+                    {theme === 'dark' ? '☀️' : '🌙'}
+                </button>
+            </div>
+
             <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-8 items-center">
 
                 {/* Player 1 (Black for now if view is white) */}
-                <div className="bg-zinc-800 p-6 rounded-xl shadow-lg border border-zinc-700 flex flex-col items-center gap-4 w-full h-full justify-center">
-                    <div className="w-16 h-16 rounded-full bg-zinc-700 flex items-center justify-center text-2xl font-bold">♟️</div>
-                    <div className="text-xl font-bold text-zinc-300">Opponent</div>
-                    <div className={`text-4xl font-mono p-4 rounded-lg bg-zinc-900 border-2 ${game.turn() === 'b' ? 'border-emerald-500 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'border-zinc-700 text-zinc-500'}`}>
+                <div className="bg-white dark:bg-zinc-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-zinc-700 flex flex-col items-center gap-4 w-full h-full justify-center transition-colors duration-300">
+                    <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center text-2xl font-bold">♟️</div>
+                    <div className="text-xl font-bold text-gray-700 dark:text-zinc-300">Opponent</div>
+                    <div className={`text-4xl font-mono p-4 rounded-lg bg-gray-50 dark:bg-zinc-900 border-2 transition-colors ${game.turn() === 'b' ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'border-gray-200 dark:border-zinc-700 text-gray-400 dark:text-zinc-500'}`}>
                         {formatTime(blackTime)}
                     </div>
                 </div>
@@ -108,20 +134,20 @@ export default function Game() {
                 {/* Board */}
                 <div className="flex flex-col items-center gap-4">
                     <div className="text-center space-y-1">
-                        <h2 className="text-xl text-zinc-400">Room: <span className="font-mono text-emerald-400">{roomId}</span></h2>
+                        <h2 className="text-xl text-gray-600 dark:text-zinc-400">Room: <span className="font-mono text-emerald-600 dark:text-emerald-400">{roomId}</span></h2>
                         <div className="h-6 flex items-center justify-center gap-2">
                             {game.isCheck() && <span className="text-red-500 font-bold animate-pulse">CHECK!</span>}
-                            {game.isGameOver() && <span className="text-emerald-400 font-bold">GAME OVER</span>}
+                            {game.isGameOver() && <span className="text-emerald-600 dark:text-emerald-400 font-bold">GAME OVER</span>}
                         </div>
                     </div>
 
-                    <div className="w-[80vw] max-w-[500px] aspect-square bg-zinc-800 p-2 rounded-lg shadow-2xl border border-zinc-700">
+                    <div className="w-[80vw] max-w-[500px] aspect-square bg-white dark:bg-zinc-800 p-2 rounded-lg shadow-2xl border border-gray-200 dark:border-zinc-700 transition-colors duration-300">
                         <Chessboard
                             position={game.fen()}
                             onPieceDrop={onDrop}
                             boardOrientation={orientation}
-                            customDarkSquareStyle={{ backgroundColor: '#059669' }}
-                            customLightSquareStyle={{ backgroundColor: '#d1fae5' }}
+                            customDarkSquareStyle={{ backgroundColor: theme === 'dark' ? '#059669' : '#059669' }}
+                            customLightSquareStyle={{ backgroundColor: theme === 'dark' ? '#d1fae5' : '#f0fdf4' }}
                             customPieces={{
                                 // Can add custom pieces here if requested, sticking to default for now
                             }}
@@ -130,10 +156,10 @@ export default function Game() {
                 </div>
 
                 {/* Player 2 (You/White) */}
-                <div className="bg-zinc-800 p-6 rounded-xl shadow-lg border border-zinc-700 flex flex-col items-center gap-4 w-full h-full justify-center">
+                <div className="bg-white dark:bg-zinc-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-zinc-700 flex flex-col items-center gap-4 w-full h-full justify-center transition-colors duration-300">
                     <div className="w-16 h-16 rounded-full bg-emerald-600 flex items-center justify-center text-2xl font-bold text-white">♙</div>
-                    <div className="text-xl font-bold text-white">You</div>
-                    <div className={`text-4xl font-mono p-4 rounded-lg bg-zinc-900 border-2 ${game.turn() === 'w' ? 'border-emerald-500 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'border-zinc-700 text-zinc-500'}`}>
+                    <div className="text-xl font-bold text-gray-900 dark:text-white">You</div>
+                    <div className={`text-4xl font-mono p-4 rounded-lg bg-gray-50 dark:bg-zinc-900 border-2 transition-colors ${game.turn() === 'w' ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'border-gray-200 dark:border-zinc-700 text-gray-400 dark:text-zinc-500'}`}>
                         {formatTime(whiteTime)}
                     </div>
 
