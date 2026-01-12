@@ -12,6 +12,8 @@ export default function Home() {
         if (username && room) {
             // Send username to server during handshake or just separate event?
             // For now, we will just connect.
+            // Save username for persistence
+            localStorage.setItem('username', username)
             socket.auth = { username }
             socket.connect()
             navigate(`/game/${room}`)

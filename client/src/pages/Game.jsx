@@ -158,7 +158,7 @@ export default function Game() {
                 {/* Player 2 (You/White) */}
                 <div className="bg-white dark:bg-zinc-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-zinc-700 flex flex-col items-center gap-4 w-full h-full justify-center transition-colors duration-300">
                     <div className="w-16 h-16 rounded-full bg-emerald-600 flex items-center justify-center text-2xl font-bold text-white">♙</div>
-                    <div className="text-xl font-bold text-gray-900 dark:text-white">You</div>
+                    <div className="text-xl font-bold text-gray-900 dark:text-white">{localStorage.getItem('username') || 'You'}</div>
                     <div className={`text-4xl font-mono p-4 rounded-lg bg-gray-50 dark:bg-zinc-900 border-2 transition-colors ${game.turn() === 'w' ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'border-gray-200 dark:border-zinc-700 text-gray-400 dark:text-zinc-500'}`}>
                         {formatTime(whiteTime)}
                     </div>
