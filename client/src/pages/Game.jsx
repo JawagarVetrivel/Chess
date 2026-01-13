@@ -44,8 +44,24 @@ export default function Game() {
     }, [game, hasGameStarted])
 
     useEffect(() => {
-        if (!socket.connected) socket.connect()
-        socket.emit('join_room', roomId)
+        const handleJoin = () => {
+            console.log(`Socket connected: ${socket.id}, joining room: ${roomId}`);
+            socket.emit('join_room', roomId);
+        };
+
+        if (!socket.connected) {
+            console.log("Socket disconnected, connecting...");
+            socket.connect();
+        } else {
+            handleJoin();
+        }
+
+        const onConnect = () => {
+            console.log("Socket connected event received");
+            handleJoin();
+        };
+
+        socket.on('connect', onConnect);
 
         socket.on('receive_move', (move) => {
             setGame((g) => {
@@ -65,10 +81,12 @@ export default function Game() {
         })
 
         socket.on('game_start', () => {
+            console.log("Game started event received");
             setHasGameStarted(true)
         })
 
         return () => {
+            socket.off('connect', onConnect);
             socket.off('receive_move')
             socket.off('player_resigned')
             socket.off('game_start')

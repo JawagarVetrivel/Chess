@@ -22,9 +22,15 @@ io.on('connection', (socket) => {
         console.log(`User with ID: ${socket.id} joined room: ${data}`);
 
         const room = io.sockets.adapter.rooms.get(data);
-        if (room && room.size === 2) {
+        const size = room ? room.size : 0;
+        console.log(`Room ${data} size: ${size}`);
+
+        if (size === 2) {
             io.to(data).emit('game_start');
             console.log(`Game started in room: ${data}`);
+        } else if (size > 2) {
+            // Optional: Kick extra users or handle spectators
+            console.log(`Room ${data} is full!`);
         }
     });
 
