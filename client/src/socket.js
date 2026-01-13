@@ -2,7 +2,9 @@ import { io } from "socket.io-client";
 
 // In production, this URL should probably be an env var
 const URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3001";
-console.log("Connecting to socket at:", URL);
+console.log("--------------------");
+console.log("Attempting to connect to Socket URL:", URL);
+console.log("--------------------");
 
 export const socket = io(URL, {
     autoConnect: false,
