@@ -85,11 +85,19 @@ export default function Game() {
             setHasGameStarted(true)
         })
 
+        socket.on('load_game', (fen) => {
+            console.log("Loading saved game state:", fen);
+            const loadedGame = new Chess(fen);
+            setGame(loadedGame);
+            setHasGameStarted(true); // Assuming if state exists, game is active
+        });
+
         return () => {
             socket.off('connect', onConnect);
             socket.off('receive_move')
             socket.off('player_resigned')
             socket.off('game_start')
+            socket.off('load_game')
         }
     }, [roomId])
 
@@ -107,7 +115,8 @@ export default function Game() {
             if (result === null) return false
 
             setGame(gameCopy)
-            socket.emit('send_move', { roomId, move })
+            // Send new FEN string along with the move
+            socket.emit('send_move', { roomId, move, fen: gameCopy.fen() })
             return true
         } catch (error) {
             return false
